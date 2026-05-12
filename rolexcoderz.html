@@ -1,0 +1,1383 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RolexCoderZ</title>
+    <script src="https://rolexcoderz.com/Check/guard.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a10;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,16,0.92);
+            backdrop-filter: blur(16px);
+            z-index: 50;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            background: linear-gradient(120deg, #a78bfa, #e879f9, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .batch-count {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        .page-title {
+            padding: 36px 28px 20px;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title span {
+            background: linear-gradient(90deg, #a78bfa, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-label {
+            padding: 0 28px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .section-label svg { flex-shrink: 0; }
+        #fav-section { display: none; }
+        #fav-section.has-favs { display: block; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 20px;
+            padding: 0 28px 80px;
+        }
+        .grid.fav-grid { padding-bottom: 4px; }
+
+        .card {
+            background: #111119;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(.34,1.4,.64,1), box-shadow 0.25s ease, border-color 0.25s ease;
+            animation: up 0.45s ease both;
+            position: relative;
+        }
+
+        @keyframes up {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(167,139,250,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(167,139,250,0.08);
+        }
+
+        .card.fav-card {
+            border-color: rgba(251, 113, 133, 0.35);
+            box-shadow: 0 0 0 1px rgba(251,113,133,0.12) inset;
+        }
+
+        .heart-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10,10,16,0.65);
+            backdrop-filter: blur(8px);
+            transition: transform 0.2s cubic-bezier(.34,1.6,.64,1), background 0.2s ease;
+        }
+        .heart-btn:hover { transform: scale(1.18); background: rgba(10,10,16,0.9); }
+        .heart-btn svg { pointer-events: none; }
+
+        .heart-btn .heart-outline { display: block; }
+        .heart-btn .heart-filled  { display: none; }
+
+        .heart-btn.active .heart-outline { display: none; }
+        .heart-btn.active .heart-filled  { display: block; }
+
+        @keyframes heartPop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.5); }
+            70%  { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        .heart-btn.pop { animation: heartPop 0.38s cubic-bezier(.34,1.4,.64,1) both; }
+
+        .card-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            background: #0d0d18;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card-img img { transform: scale(1.05); }
+
+        .no-img {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #130f2a, #0f1525);
+            font-size: 52px;
+        }
+
+        .card-body {
+            padding: 16px 18px 18px;
+        }
+
+        .card-name {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.92);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 44px;
+        }
+
+        .study-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 11px 0;
+            background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+            background-size: 200% 200%;
+            color: #fff;
+            border: none;
+            border-radius: 11px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: 0.2px;
+            transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+        }
+
+        .study-btn:hover {
+            background-position: right center;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(168,85,247,0.55);
+        }
+
+        .study-btn svg { transition: transform 0.2s ease; }
+        .study-btn:hover svg { transform: translateX(3px); }
+
+        .empty {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 120px 20px;
+        }
+
+        .empty div:first-child { font-size: 56px; opacity: .2; margin-bottom: 16px; }
+        .empty div:last-child  { font-size: 15px; color: rgba(255,255,255,.2); line-height: 1.7; }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 60px; }
+            .grid.fav-grid { padding-bottom: 4px; }
+            .card-name { font-size: 13px; min-height: 38px; }
+            .page-title { padding: 24px 16px 14px; font-size: 21px; }
+            header { padding: 16px 18px; }
+            .section-label { padding: 0 16px 10px; }
+        }
+
+        @media (max-width: 360px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">RolexCoderZ</div>
+    <div class="batch-count">27 Batches</div>
+</header>
+
+<div class="page-title">Choose Your <span>Batch</span></div>
+
+
+<div id="fav-section">
+    <div class="section-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#fb7185">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        Favourite Batch
+    </div>
+    <div class="grid fav-grid" id="fav-grid"></div>
+</div>
+
+<div class="section-label" id="all-label" style="display:none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    All Batches
+</div>
+
+<div class="grid" id="all-grid">
+    <div class="card"
+         id="card-67790151518b938bc630052d"
+         data-batch-id="67790151518b938bc630052d"
+         data-name="Udaan 2027 (Class 10th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/86f18c6c-8150-476d-b5db-8b3685a0471a.png"
+         style="animation-delay:0s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=67790151518b938bc630052d'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '67790151518b938bc630052d')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/86f18c6c-8150-476d-b5db-8b3685a0471a.png"
+                     alt="Udaan 2027 (Class 10th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Udaan 2027 (Class 10th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=67790151518b938bc630052d"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698de475e0f24f0f10b97658"
+         data-batch-id="698de475e0f24f0f10b97658"
+         data-name="UDAY 2027 (Class 11th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/c2997cc9-75b7-4527-b19f-208400296c80.png"
+         style="animation-delay:0.07s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698de475e0f24f0f10b97658'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698de475e0f24f0f10b97658')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/c2997cc9-75b7-4527-b19f-208400296c80.png"
+                     alt="UDAY 2027 (Class 11th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">UDAY 2027 (Class 11th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698de475e0f24f0f10b97658"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69897f0ad7c19b7b2f7cc35f"
+         data-batch-id="69897f0ad7c19b7b2f7cc35f"
+         data-name="Arjuna NEET 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/dae900c7-8148-4beb-8666-6136e0701958.jpeg"
+         style="animation-delay:0.14s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69897f0ad7c19b7b2f7cc35f'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69897f0ad7c19b7b2f7cc35f')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/dae900c7-8148-4beb-8666-6136e0701958.jpeg"
+                     alt="Arjuna NEET 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Arjuna NEET 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69897f0ad7c19b7b2f7cc35f"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698ad3519549b300a5e1cc6a"
+         data-batch-id="698ad3519549b300a5e1cc6a"
+         data-name="Arjuna JEE 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/ec947628-7b9d-4c30-bbc4-c0c3e3db78a2.jpeg"
+         style="animation-delay:0.21s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698ad3519549b300a5e1cc6a'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698ad3519549b300a5e1cc6a')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/ec947628-7b9d-4c30-bbc4-c0c3e3db78a2.jpeg"
+                     alt="Arjuna JEE 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Arjuna JEE 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698ad3519549b300a5e1cc6a"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-6779346f920e596fe7f0e247"
+         data-batch-id="6779346f920e596fe7f0e247"
+         data-name="Lakshya NEET 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d956b34e-7919-4feb-9fe7-d131ccfa9276.jpeg"
+         style="animation-delay:0.28s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=6779346f920e596fe7f0e247'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '6779346f920e596fe7f0e247')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d956b34e-7919-4feb-9fe7-d131ccfa9276.jpeg"
+                     alt="Lakshya NEET 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Lakshya NEET 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=6779346f920e596fe7f0e247"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-6779345c20fa0756e4a7fd08"
+         data-batch-id="6779345c20fa0756e4a7fd08"
+         data-name="Lakshya JEE 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/605920d1-950f-4600-9268-8d3ae499713e.jpeg"
+         style="animation-delay:0.35s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=6779345c20fa0756e4a7fd08'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '6779345c20fa0756e4a7fd08')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/605920d1-950f-4600-9268-8d3ae499713e.jpeg"
+                     alt="Lakshya JEE 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Lakshya JEE 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=6779345c20fa0756e4a7fd08"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-697cddabf050baa08837223e"
+         data-batch-id="697cddabf050baa08837223e"
+         data-name="PARISHRAM 2027 (Class 12th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/c28145d4-ccf1-4990-85e9-493dcb43db81.png"
+         style="animation-delay:0.42s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=697cddabf050baa08837223e'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '697cddabf050baa08837223e')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/c28145d4-ccf1-4990-85e9-493dcb43db81.png"
+                     alt="PARISHRAM 2027 (Class 12th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">PARISHRAM 2027 (Class 12th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=697cddabf050baa08837223e"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-67a369a90af17d7290ede6bf"
+         data-batch-id="67a369a90af17d7290ede6bf"
+         data-name="Parishram 2027 Class 12th Commerce"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e928d773-6f3e-442f-91c2-49f0062b019b.png"
+         style="animation-delay:0.49s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=67a369a90af17d7290ede6bf'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '67a369a90af17d7290ede6bf')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e928d773-6f3e-442f-91c2-49f0062b019b.png"
+                     alt="Parishram 2027 Class 12th Commerce"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Parishram 2027 Class 12th Commerce</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=67a369a90af17d7290ede6bf"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-676e5677418e84037bd6247c"
+         data-batch-id="676e5677418e84037bd6247c"
+         data-name="Arjuna NEET 2026"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/faaf5401-7378-41fc-89bf-14e8cad4d25c.png"
+         style="animation-delay:0.56s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=676e5677418e84037bd6247c'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '676e5677418e84037bd6247c')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/faaf5401-7378-41fc-89bf-14e8cad4d25c.png"
+                     alt="Arjuna NEET 2026"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Arjuna NEET 2026</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=676e5677418e84037bd6247c"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-678a08fc872e93ccb58047b0"
+         data-batch-id="678a08fc872e93ccb58047b0"
+         data-name="Arjuna NEET 2.0 2026"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d8d91058-1460-4fa1-8989-1e717738ec1f.png"
+         style="animation-delay:0.63s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=678a08fc872e93ccb58047b0'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '678a08fc872e93ccb58047b0')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d8d91058-1460-4fa1-8989-1e717738ec1f.png"
+                     alt="Arjuna NEET 2.0 2026"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Arjuna NEET 2.0 2026</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=678a08fc872e93ccb58047b0"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69d92a4285d465ca49979239"
+         data-batch-id="69d92a4285d465ca49979239"
+         data-name="YouTube Content Creation – Earners"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/74601c05-e386-4c8a-85b7-11fd0dfde78f.jpg"
+         style="animation-delay:0.7s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69d92a4285d465ca49979239'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69d92a4285d465ca49979239')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/74601c05-e386-4c8a-85b7-11fd0dfde78f.jpg"
+                     alt="YouTube Content Creation – Earners"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">YouTube Content Creation – Earners</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69d92a4285d465ca49979239"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69d92a42b4c22d5801c888b8"
+         data-batch-id="69d92a42b4c22d5801c888b8"
+         data-name="Mobile Graphic Designing – Earners"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d7c922b7-f6d2-43c9-b683-7e0eaa5ca8a2.jpg"
+         style="animation-delay:0.77s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69d92a42b4c22d5801c888b8'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69d92a42b4c22d5801c888b8')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d7c922b7-f6d2-43c9-b683-7e0eaa5ca8a2.jpg"
+                     alt="Mobile Graphic Designing – Earners"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Mobile Graphic Designing – Earners</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69d92a42b4c22d5801c888b8"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69d92a42315113d50d9f33d9"
+         data-batch-id="69d92a42315113d50d9f33d9"
+         data-name="AI &amp; ChatGPT – Earners"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/b8ef54b5-f1ee-496d-aae8-d67c592eb823.jpg"
+         style="animation-delay:0.84s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69d92a42315113d50d9f33d9'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69d92a42315113d50d9f33d9')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/b8ef54b5-f1ee-496d-aae8-d67c592eb823.jpg"
+                     alt="AI &amp; ChatGPT – Earners"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">AI &amp; ChatGPT – Earners</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69d92a42315113d50d9f33d9"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69d92a415ce6b5d234913845"
+         data-batch-id="69d92a415ce6b5d234913845"
+         data-name="Instagram &amp; Social Media – Earners"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/bd653f70-ab59-46ea-96e2-a29b3512a26c.jpg"
+         style="animation-delay:0.91s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69d92a415ce6b5d234913845'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69d92a415ce6b5d234913845')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/bd653f70-ab59-46ea-96e2-a29b3512a26c.jpg"
+                     alt="Instagram &amp; Social Media – Earners"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Instagram &amp; Social Media – Earners</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69d92a415ce6b5d234913845"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-6774f509dcc961a5430bb4ba"
+         data-batch-id="6774f509dcc961a5430bb4ba"
+         data-name="UDAY 2026 (Class 11th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/5ccf3806-0fe3-4f7f-aadb-9f3afe3a06fe.png"
+         style="animation-delay:0.98s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=6774f509dcc961a5430bb4ba'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '6774f509dcc961a5430bb4ba')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/5ccf3806-0fe3-4f7f-aadb-9f3afe3a06fe.png"
+                     alt="UDAY 2026 (Class 11th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">UDAY 2026 (Class 11th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=6774f509dcc961a5430bb4ba"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698de475543bcb25f95449b8"
+         data-batch-id="698de475543bcb25f95449b8"
+         data-name="NEEV 2027 (Class 9th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e691c6bd-9e7d-4724-9589-51feee2a3283.jpeg"
+         style="animation-delay:1.05s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698de475543bcb25f95449b8'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698de475543bcb25f95449b8')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e691c6bd-9e7d-4724-9589-51feee2a3283.jpeg"
+                     alt="NEEV 2027 (Class 9th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">NEEV 2027 (Class 9th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698de475543bcb25f95449b8"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-67beb6e665bd7b47d657bcbf"
+         data-batch-id="67beb6e665bd7b47d657bcbf"
+         data-name="NEEV 2.0 2026 (Class 9th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/fc98542b-5f3b-4709-a0c8-993fb935c4f0.png"
+         style="animation-delay:1.12s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=67beb6e665bd7b47d657bcbf'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '67beb6e665bd7b47d657bcbf')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/fc98542b-5f3b-4709-a0c8-993fb935c4f0.png"
+                     alt="NEEV 2.0 2026 (Class 9th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">NEEV 2.0 2026 (Class 9th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=67beb6e665bd7b47d657bcbf"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-6774ebb37aa1a60276d43e7c"
+         data-batch-id="6774ebb37aa1a60276d43e7c"
+         data-name="NEEV 2026 (Class 9th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/0d87949f-d1f8-4483-bcf2-80730b8f5369.png"
+         style="animation-delay:1.19s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=6774ebb37aa1a60276d43e7c'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '6774ebb37aa1a60276d43e7c')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/0d87949f-d1f8-4483-bcf2-80730b8f5369.png"
+                     alt="NEEV 2026 (Class 9th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">NEEV 2026 (Class 9th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=6774ebb37aa1a60276d43e7c"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-676e4dee1ec923bc192f38c9"
+         data-batch-id="676e4dee1ec923bc192f38c9"
+         data-name="Arjuna JEE 2026"
+         data-image="https://i.ibb.co/CszYNDKz/61e8fafe-0891-4741-a76d-b3f7dedae5b7-1.png"
+         style="animation-delay:1.26s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=676e4dee1ec923bc192f38c9'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '676e4dee1ec923bc192f38c9')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://i.ibb.co/CszYNDKz/61e8fafe-0891-4741-a76d-b3f7dedae5b7-1.png"
+                     alt="Arjuna JEE 2026"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Arjuna JEE 2026</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=676e4dee1ec923bc192f38c9"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69d92a4155af49c2ea134f24"
+         data-batch-id="69d92a4155af49c2ea134f24"
+         data-name="Mobile Video Editing – Earners"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d32c4eb1-eb6c-44a0-982a-ea8b81f2f8e9.jpg"
+         style="animation-delay:1.33s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69d92a4155af49c2ea134f24'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69d92a4155af49c2ea134f24')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/d32c4eb1-eb6c-44a0-982a-ea8b81f2f8e9.jpg"
+                     alt="Mobile Video Editing – Earners"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Mobile Video Editing – Earners</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69d92a4155af49c2ea134f24"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-6984a17d4520f144c34e3745"
+         data-batch-id="6984a17d4520f144c34e3745"
+         data-name="UDAY 2027 Class 11th Commerce"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/82b82785-4e1c-45bc-b7e8-d850741b9258.png"
+         style="animation-delay:1.4s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=6984a17d4520f144c34e3745'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '6984a17d4520f144c34e3745')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/82b82785-4e1c-45bc-b7e8-d850741b9258.png"
+                     alt="UDAY 2027 Class 11th Commerce"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">UDAY 2027 Class 11th Commerce</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=6984a17d4520f144c34e3745"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69897f0a4c12aeb013d4ea52"
+         data-batch-id="69897f0a4c12aeb013d4ea52"
+         data-name="Yakeen NEET 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e561e985-b6dc-42ba-8e46-1338348f3dca.png"
+         style="animation-delay:1.47s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69897f0a4c12aeb013d4ea52'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69897f0a4c12aeb013d4ea52')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/e561e985-b6dc-42ba-8e46-1338348f3dca.png"
+                     alt="Yakeen NEET 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Yakeen NEET 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69897f0a4c12aeb013d4ea52"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698ad35209494b495cfcc9c4"
+         data-batch-id="698ad35209494b495cfcc9c4"
+         data-name="Prayas JEE 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/28d84a98-887d-47c2-914e-42d4e1177bf0.png"
+         style="animation-delay:1.54s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698ad35209494b495cfcc9c4'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698ad35209494b495cfcc9c4')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/28d84a98-887d-47c2-914e-42d4e1177bf0.png"
+                     alt="Prayas JEE 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Prayas JEE 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698ad35209494b495cfcc9c4"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-69a263a3c29e14ec34c75e05"
+         data-batch-id="69a263a3c29e14ec34c75e05"
+         data-name="CLAT ZENITH 2028"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/28f1cd5b-a8c4-4cfb-964e-484ff7332f6f.png"
+         style="animation-delay:1.61s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=69a263a3c29e14ec34c75e05'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '69a263a3c29e14ec34c75e05')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/28f1cd5b-a8c4-4cfb-964e-484ff7332f6f.png"
+                     alt="CLAT ZENITH 2028"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">CLAT ZENITH 2028</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=69a263a3c29e14ec34c75e05"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698af10a518ff8691b6a5c45"
+         data-batch-id="698af10a518ff8691b6a5c45"
+         data-name="UDAY NDA FOUNDATION 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/ce2532d3-0e62-4b5f-bb58-b375b03bc3f4.png"
+         style="animation-delay:1.68s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698af10a518ff8691b6a5c45'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698af10a518ff8691b6a5c45')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/ce2532d3-0e62-4b5f-bb58-b375b03bc3f4.png"
+                     alt="UDAY NDA FOUNDATION 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">UDAY NDA FOUNDATION 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698af10a518ff8691b6a5c45"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-67becd2b508fc4755e5c5bde"
+         data-batch-id="67becd2b508fc4755e5c5bde"
+         data-name="UDAY 2.0 2026 (Class 11th)"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/816ffbf8-c70e-49b0-88ff-43b364bc8f06.png"
+         style="animation-delay:1.75s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=67becd2b508fc4755e5c5bde'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '67becd2b508fc4755e5c5bde')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/816ffbf8-c70e-49b0-88ff-43b364bc8f06.png"
+                     alt="UDAY 2.0 2026 (Class 11th)"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">UDAY 2.0 2026 (Class 11th)</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=67becd2b508fc4755e5c5bde"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="card"
+         id="card-698ec4d979fb4aa23c1fd2c3"
+         data-batch-id="698ec4d979fb4aa23c1fd2c3"
+         data-name="Yakeen 2.0 2027"
+         data-image="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/7912cc06-115d-4a20-a310-fcc8517ea3bf.png"
+         style="animation-delay:1.82s"
+         onclick="location.href='https://rolexcoderz.com/RC/?batchId=698ec4d979fb4aa23c1fd2c3'">
+
+        <button class="heart-btn"
+                onclick="toggleFav(event, '698ec4d979fb4aa23c1fd2c3')"
+                title="Favourite mein add karo">
+            <svg class="heart-outline" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-filled" width="16" height="16" viewBox="0 0 24 24" fill="#fb7185">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </button>
+
+        <div class="card-img">
+                            <img src="https://static.pw.live/5eb393ee95fab7468a79d189/ADMIN/7912cc06-115d-4a20-a310-fcc8517ea3bf.png"
+                     alt="Yakeen 2.0 2027"
+                     onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📖</div>'">
+                    </div>
+
+        <div class="card-body">
+            <div class="card-name">Yakeen 2.0 2027</div>
+            <a class="study-btn"
+               href="https://rolexcoderz.com/RC/?batchId=698ec4d979fb4aa23c1fd2c3"
+               onclick="event.stopPropagation()">
+                Let's Study
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+const FAV_KEY = 'rcz_fav_batches';
+
+function getFavs() {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }
+    catch(e) { return []; }
+}
+
+function saveFavs(arr) {
+    localStorage.setItem(FAV_KEY, JSON.stringify(arr));
+}
+
+function toggleFav(e, batchId) {
+    e.stopPropagation();
+    let favs = getFavs();
+    const btn = e.currentTarget;
+    btn.classList.remove('pop');
+    void btn.offsetWidth;
+    btn.classList.add('pop');
+    if (favs.includes(batchId)) {
+        favs = favs.filter(id => id !== batchId);
+    } else {
+        favs.push(batchId);
+    }
+    saveFavs(favs);
+    renderFavSection();
+}
+
+function buildFavCard(srcCard) {
+    const clone = srcCard.cloneNode(true);
+    clone.id = 'fav-' + srcCard.id;
+    clone.style.animationDelay = '0s';
+    clone.classList.add('fav-card');
+    const btn = clone.querySelector('.heart-btn');
+    const batchId = clone.dataset.batchId;
+    btn.onclick = (e) => toggleFav(e, batchId);
+    return clone;
+}
+
+function renderFavSection() {
+    const favs       = getFavs();
+    const favSection = document.getElementById('fav-section');
+    const favGrid    = document.getElementById('fav-grid');
+    const allLabel   = document.getElementById('all-label');
+
+    if (!favSection) return;
+
+    document.querySelectorAll('#all-grid .heart-btn').forEach(btn => {
+        const batchId = btn.closest('.card').dataset.batchId;
+        btn.classList.toggle('active', favs.includes(batchId));
+    });
+
+    favGrid.innerHTML = '';
+    favs.forEach(id => {
+        const src = document.getElementById('card-' + id);
+        if (src) favGrid.appendChild(buildFavCard(src));
+    });
+
+    favGrid.querySelectorAll('.heart-btn').forEach(btn => {
+        btn.classList.add('active');
+    });
+
+    if (favs.length > 0) {
+        favSection.classList.add('has-favs');
+        allLabel.style.display = 'flex';
+    } else {
+        favSection.classList.remove('has-favs');
+        allLabel.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', renderFavSection);
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4d42689b8b57448eadca12d9037c095e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
